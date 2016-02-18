@@ -7,45 +7,57 @@ import java.util.List;
 public class Route {
     String source;
     String dest;
-    List<Point> points = new ArrayList<>();
+    List<Block> blocks = new ArrayList<>();
     List<Signal> signals = new ArrayList<>();
     List<Path> paths = new ArrayList<>();
     String conflicts;
 
-    public Route(String source, String dest, String point, String signal, String path, String conflict) {
+    public Route(String source,String dest){
         this.source = source;
         this.dest = dest;
 
-        String[] pointArray;
 
-        if (point.contains(";")){
-            pointArray = point.split(";");
-            for (int i=0;i<pointArray.length;i++){
-                String[] ps = pointArray[i].split(":");
-                Point p = new Point(ps[0],Boolean.parseBoolean(ps[1]));
-                System.out.println(p.getName()+" "+p.getFlag());
-                points.add(p);
+    }
+
+    public List<Block> getBlock(String source,String dest){
+        List<Block> list = new ArrayList<>();
+        return list;
+    }
+
+    public Route(String source, String dest, String block, String signal, String path, String conflict) {
+        this.source = source;
+        this.dest = dest;
+
+        String[] blockArray;
+
+        if (block.contains(";")){
+            blockArray = block.split(";");
+            for (int i=0;i<blockArray.length;i++){
+                String[] ps = blockArray[i].split(":");
+//                Block p = new Block(ps[0],Boolean.parseBoolean(ps[1]));
+//                System.out.println(p.getName()+" "+p.getFlag());
+//                blocks.add(p);
             }
         }else {
-            pointArray = point.split(":");
-            Point p = new Point(pointArray[0],Boolean.parseBoolean(pointArray[1]));
-            System.out.println(p.getName()+" "+p.getFlag());
-            points.add(p);
+            blockArray = block.split(":");
+//            Block p = new Block(blockArray[0],Boolean.parseBoolean(blockArray[1]));
+//            System.out.println(p.getName()+" "+p.getFlag());
+//            blocks.add(p);
         }
 
         if (signal.contains(";")) {
             String[] signalList = signal.split(";");
             for (int i = 0; i < signalList.length; i++) {
                 String[] ss = signalList[i].split(":");
-                Signal s = new Signal(ss[0],Boolean.parseBoolean(ss[1]));
-                System.out.println(s.getName() + " " + s.getFlag());
-                signals.add(s);
+//                Signal s = new Signal(ss[0],Boolean.parseBoolean(ss[1]));
+//                System.out.println(s.getName() + " " + s.getFlag());
+//                signals.add(s);
             }
         }else {
             String[] ss = signal.split(":");
-            Signal s = new Signal(ss[0],Boolean.parseBoolean(ss[1]));
-            System.out.println(s.getName()+" "+s.getFlag());
-            signals.add(s);
+//            Signal s = new Signal(ss[0],Boolean.parseBoolean(ss[1]));
+//            System.out.println(s.getName()+" "+s.getFlag());
+//            signals.add(s);
         }
 
         if (path.contains(";")){
@@ -65,7 +77,7 @@ public class Route {
         this.conflicts = conflict;
 
 
-        System.out.println(this.source+" "+this.dest+" "+points+" "+signals+" "+paths+" "+conflicts);
+//        System.out.println(this.source+" "+this.dest+" "+points+" "+signals+" "+paths+" "+conflicts);
     }
 
     public String getSource() {
@@ -84,12 +96,12 @@ public class Route {
         this.dest = dest;
     }
 
-    public List<Point> getPoints() {
-        return points;
+    public List<Block> getBlocks() {
+        return blocks;
     }
 
-    public void setPoints(List<Point> points) {
-        this.points = points;
+    public void setBlocks(List<Block> blocks) {
+        this.blocks = blocks;
     }
 
     public List<Signal> getSignals() {

@@ -38,6 +38,7 @@ public class Main {
         Route r3 = new Route("s8","s3","p2:m;p1:p",s7+";"+s6+";"+s1,"b5;p2;b3","r2;r4");
         Route r4 = new Route("s3","s2","p1:m",s1+";"+s5,"b3;p1;b2","r1;r3");
 
+        Railway railway = new Railway();
 
     }
 }
