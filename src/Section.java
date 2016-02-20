@@ -4,24 +4,36 @@ import java.util.List;
 /**
  * Created by tommy on 2016/2/15.
  */
-public class Block{
+public class Section{
     String name;
-    int type;// 0 -> track     1 -> point
+    int type;// 0 -> block     1 -> point
     int position;// 0 -> PLUS    1 -> MINUS   3 -> npt point
-    List<Block> neighs = new ArrayList<>();// 2 neighs for track and 3 neighs for point
+    String previous;// previous section
+    String next;// next section
+//    List<Section> neighs = new ArrayList<>();// 2 neighs for track and 3 neighs for point
 
-    public Block(String name, int type) {
+    public Section(String name, int type, String previous, String next) {
         this.name = name;
         this.type = type;
+        this.previous = previous;
+        this.next = next;
 //        this.position = position;
     }
 
-    public List<Block> getNeighs() {
-        return neighs;
+    public String getPrevious() {
+        return previous;
     }
 
-    public void setNeighs(List<Block> neighs) {
-        this.neighs = neighs;
+    public void setPrevious(String previous) {
+        this.previous = previous;
+    }
+
+    public String getNext() {
+        return next;
+    }
+
+    public void setNext(String next) {
+        this.next = next;
     }
 
     public String getName() {

@@ -7,20 +7,18 @@ import java.util.List;
 public class Route {
     String source;
     String dest;
-    List<Block> blocks = new ArrayList<>();
     List<Signal> signals = new ArrayList<>();
-    List<Path> paths = new ArrayList<>();
+    String path;
     String conflicts;
 
-    public Route(String source,String dest){
+    public Route(String source,String dest,String path){
         this.source = source;
         this.dest = dest;
-
-
+        this.path = path;
     }
 
-    public List<Block> getBlock(String source,String dest){
-        List<Block> list = new ArrayList<>();
+    public List<Section> getSection(String source,String dest){
+        List<Section> list = new ArrayList<>();
         return list;
     }
 
@@ -34,15 +32,15 @@ public class Route {
             blockArray = block.split(";");
             for (int i=0;i<blockArray.length;i++){
                 String[] ps = blockArray[i].split(":");
-//                Block p = new Block(ps[0],Boolean.parseBoolean(ps[1]));
+//                Section p = new Section(ps[0],Boolean.parseBoolean(ps[1]));
 //                System.out.println(p.getName()+" "+p.getFlag());
-//                blocks.add(p);
+//                sections.add(p);
             }
         }else {
             blockArray = block.split(":");
-//            Block p = new Block(blockArray[0],Boolean.parseBoolean(blockArray[1]));
+//            Section p = new Section(blockArray[0],Boolean.parseBoolean(blockArray[1]));
 //            System.out.println(p.getName()+" "+p.getFlag());
-//            blocks.add(p);
+//            sections.add(p);
         }
 
         if (signal.contains(";")) {
@@ -59,6 +57,7 @@ public class Route {
 //            System.out.println(s.getName()+" "+s.getFlag());
 //            signals.add(s);
         }
+/*
 
         if (path.contains(";")){
             String[] pathList = path.split(";");
@@ -72,6 +71,7 @@ public class Route {
             System.out.println(p.getName());
             paths.add(p);
         }
+*/
 
 
         this.conflicts = conflict;
@@ -96,14 +96,6 @@ public class Route {
         this.dest = dest;
     }
 
-    public List<Block> getBlocks() {
-        return blocks;
-    }
-
-    public void setBlocks(List<Block> blocks) {
-        this.blocks = blocks;
-    }
-
     public List<Signal> getSignals() {
         return signals;
     }
@@ -112,12 +104,12 @@ public class Route {
         this.signals = signals;
     }
 
-    public List<Path> getPaths() {
-        return paths;
+    public String getPath() {
+        return path;
     }
 
-    public void setPaths(List<Path> paths) {
-        this.paths = paths;
+    public void setPath(String path) {
+        this.path = path;
     }
 
     public String getConflicts() {
