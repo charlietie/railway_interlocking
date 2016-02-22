@@ -5,22 +5,24 @@ import java.util.List;
  * Created by tommy on 2016/2/15.
  */
 public class Route {
+    String id;
     String source;
     String dest;
     List<Signal> signals = new ArrayList<>();
     String path;
     String conflicts;
 
-    public Route(String source,String dest,String path){
+    public Route(String id,String source,String dest,String path){
+        this.id = id;
         this.source = source;
         this.dest = dest;
         this.path = path;
     }
 
-    public List<Section> getSection(String source,String dest){
-        List<Section> list = new ArrayList<>();
-        return list;
-    }
+//    public List<Section> getSection(String source,String dest){
+//        List<Section> list = new ArrayList<>();
+//        return list;
+//    }
 
     public Route(String source, String dest, String block, String signal, String path, String conflict) {
         this.source = source;
@@ -78,6 +80,14 @@ public class Route {
 
 
 //        System.out.println(this.source+" "+this.dest+" "+points+" "+signals+" "+paths+" "+conflicts);
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getSource() {

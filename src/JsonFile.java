@@ -52,7 +52,7 @@ public class JsonFile {
 
     public List<Route> getRoute(){
         List<Route> list = new ArrayList<>();
-        Route route = new Route("s1","s6","b2;p1;b4");
+        Route route = new Route("r1","s1","s6","b2;p1;b4");
         List<Signal> signals = new ArrayList<>();
         Signal s2 = new Signal("s2",0,"b1");
         Signal s3 = new Signal("s3",0,"p1");

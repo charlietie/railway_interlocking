@@ -10,6 +10,7 @@ public class Section{
     int position;// 0 -> PLUS    1 -> MINUS   3 -> npt point
     String previous;// previous section
     String next;// next section
+    String occupy;//occupy by which route   r1,b2
 //    List<Section> neighs = new ArrayList<>();// 2 neighs for track and 3 neighs for point
 
     public Section(String name, int type, String previous, String next) {
@@ -18,6 +19,14 @@ public class Section{
         this.previous = previous;
         this.next = next;
 //        this.position = position;
+    }
+
+    public String getOccupy() {
+        return occupy;
+    }
+
+    public void setOccupy(String occupy) {
+        this.occupy = occupy;
     }
 
     public String getPrevious() {
