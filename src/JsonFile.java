@@ -52,16 +52,45 @@ public class JsonFile {
 
     public List<Route> getRoute(){
         List<Route> list = new ArrayList<>();
-        Route route = new Route("r1","s1","s6","b2;p1;b4");
-        List<Signal> signals = new ArrayList<>();
+
+        Signal s1 = new Signal("s1",0,"b2");
         Signal s2 = new Signal("s2",0,"b1");
         Signal s3 = new Signal("s3",0,"p1");
+        Signal s4 = new Signal("s4",0,"p2");
         Signal s5 = new Signal("s5",0,"p1");
+        Signal s6 = new Signal("s6",0,"p2");
+        Signal s7 = new Signal("s7",0,"b6");
+        Signal s8 = new Signal("s8",0,"b5");
+
+        Route r1 = new Route("r1","s1","s6","b2;p1;b4");
+        List<Signal> signals = new ArrayList<>();
         signals.add(s2);
         signals.add(s3);
         signals.add(s5);
-        route.setSignals(signals);
-        list.add(route);
+        r1.setSignals(signals);
+        list.add(r1);
+
+        signals.clear();
+        Route r2 = new Route("r2","s6","s7","p2;b5");
+        signals.add(s8);
+        signals.add(s4);
+        r2.setSignals(signals);
+        list.add(r2);
+
+        signals.clear();
+        Route r3 = new Route("r3","s8","s3","b5;p2;b3");
+        signals.add(s7);
+        signals.add(s6);
+        r3.setSignals(signals);
+        list.add(r3);
+
+        signals.clear();
+        Route r4 = new Route("r4","s3","s2","b3;p1;b2");
+        signals.add(s1);
+        signals.add(s5);
+        r4.setSignals(signals);
+        list.add(r4);
+
         return list;
     }
 

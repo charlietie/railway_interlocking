@@ -6,7 +6,7 @@ public class Main {
         Railway railway = new Railway();
         while (true){
 
-            railway.chooseRoute();
+            railway.run();
 
             try {
                 Thread.sleep(10000);
