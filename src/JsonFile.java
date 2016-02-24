@@ -28,16 +28,16 @@ public class JsonFile {
         return list;
     }
 
-    public List<Section> getSection(){
-        List<Section> list = new ArrayList<>();
-        Section b1 = new Section("b1",0,"","b2");
-        Section b2 = new Section("b2",0,"b1","p1");
-        Section b3 = new Section("b3",0,"p1","p2");
-        Section b4 = new Section("b4",0,"p1","p2");
-        Section b5 = new Section("b5",0,"p2","b6");
-        Section b6 = new Section("b6",0,"b5","");
-        Section p1 = new Section("p1",1,"b2","b3;b4");
-        Section p2 = new Section("p2",1,"b3;b4","b5");
+    public List<Block> getBlock(){
+        List<Block> list = new ArrayList<>();
+        Block b1 = new Block("b1",0,"","b2");
+        Block b2 = new Block("b2",0,"b1","p1");
+        Block b3 = new Block("b3",0,"p1","p2");
+        Block b4 = new Block("b4",0,"p1","p2");
+        Block b5 = new Block("b5",0,"p2","b6");
+        Block b6 = new Block("b6",0,"b5","");
+        Block p1 = new Block("p1",1,"b2","b3;b4");
+        Block p2 = new Block("p2",1,"b3;b4","b5");
 
         list.add(b1);
         list.add(b2);

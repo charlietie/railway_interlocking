@@ -4,7 +4,7 @@ import java.util.List;
 /**
  * Created by tommy on 2016/2/15.
  */
-public class Section{
+public class Block{
     String name;
     int type;// 0 -> block     1 -> point
     int position;// 0 -> PLUS    1 -> MINUS   3 -> npt point
@@ -13,7 +13,7 @@ public class Section{
     String occupy;//occupy by which route   r1,b2
 //    List<Section> neighs = new ArrayList<>();// 2 neighs for track and 3 neighs for point
 
-    public Section(String name, int type, String previous, String next) {
+    public Block(String name, int type, String previous, String next) {
         this.name = name;
         this.type = type;
         this.previous = previous;

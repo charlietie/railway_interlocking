@@ -5,7 +5,7 @@ import java.util.*;
  */
 public class Railway {
     List<Signal> signals;
-    List<Section> sections;
+    List<Block> blocks;
     List<Route> routes;
     List<Route> runnings = new ArrayList<>();//current running routes
     List<Route> waitings = new ArrayList<>();//current waiting routes
@@ -14,20 +14,20 @@ public class Railway {
 
         JsonFile jf = new JsonFile();
         this.signals = jf.getSignal();
-        this.sections = jf.getSection();
+        this.blocks = jf.getBlock();
         this.routes = jf.getRoute();
 
         for (int i = 0; i < signals.size(); i++) {
             Signal s = signals.get(i);
             String flag = s.getPosition() == 0 ? "STOP" : "GO";
             String direction = s.getDirection() == 0 ? "DOWN" : "UP";
-//            System.out.println("Signal: "+s.getName()+"("+direction+") controls block: "+s.getSectionName()+" current flag: "+flag);
+//            System.out.println("Signal: "+s.getName()+"("+direction+") controls block: "+s.getBlockName()+" current flag: "+flag);
         }
 
-        for (int i = 0; i < sections.size(); i++) {
-            Section b = sections.get(i);
+        for (int i = 0; i < this.blocks.size(); i++) {
+            Block b = this.blocks.get(i);
             String type = b.getType() == 0 ? "track" : "point";
-//            System.out.println("Section: "+b.getName()+" is a "+type+ " and position is "+b.getPosition());
+//            System.out.println("Block: "+b.getName()+" is a "+type+ " and position is "+b.getPosition());
         }
     }
 
@@ -96,11 +96,11 @@ public class Railway {
 
 
             for (int i = 0; i < paths.length; i++) {
-                for (int j = 0; j < this.sections.size(); j++) {
-                    Section section = this.sections.get(j);
+                for (int j = 0; j < this.blocks.size(); j++) {
+                    Block section = this.blocks.get(j);
                     if (section.getName().equals(paths[i])) {
-                        this.sections.get(j).setOccupy(route.getId());//set occupy to this section
-                        System.out.println("Section " + this.getSections().get(j).getName() + " is occupied by " + route.getId());
+                        this.blocks.get(j).setOccupy(route.getId());//set occupy to this section
+                        System.out.println("Block " + this.getBlocks().get(j).getName() + " is occupied by " + route.getId());
                     }
                 }
             }
@@ -114,8 +114,8 @@ public class Railway {
                 Route route = waiting.next();
                 System.out.println("Route " + route.getId() + " in the waitings is added");
                 boolean flag = true;//true -> not occupied    false -> occupied
-                for (int i = 0; i < this.sections.size(); i++) {
-                    String currentSecction = this.sections.get(i).getName();
+                for (int i = 0; i < this.blocks.size(); i++) {
+                    String currentSecction = this.blocks.get(i).getName();
                     String path = route.getPath();
                     String[] paths;
                     if (path.contains(";")) {
@@ -129,7 +129,7 @@ public class Railway {
                     for (int j = 0; j < paths.length; j++) {
                         System.out.println("current section name is "+currentSecction+" and this path name is "+paths[j]);
                         if (currentSecction!=null && currentSecction.equals(paths[j])) {
-                            System.out.println("Section " + paths[j] + " is occupied by " + this.sections.get(i).getOccupy());
+                            System.out.println("Block " + paths[j] + " is occupied by " + this.blocks.get(i).getOccupy());
                             flag = false;
                             break;
                         }
@@ -153,12 +153,26 @@ public class Railway {
         }
         System.out.println("2 Runnings :"+this.runnings.size()+"      waitings :"+this.waitings.size());
 
+        for (int i = 0; i < this.runnings.size(); i++) {
+            Route route = this.runnings.get(i);
+            String path = route.getPath();
+            String[] paths;
+            if (path.contains(";")) {
+                paths = path.split(";");
+            } else {
+                paths = new String[1];
+                paths[0] = path;
+            }
+
+
+        }
+
     }
 
     /**
      * update the railway's
      * signals
-     * sections
+     * blocks
      * runnings
      * waitings
      */
@@ -176,12 +190,12 @@ public class Railway {
         this.signals = signals;
     }
 
-    public List<Section> getSections() {
-        return sections;
+    public List<Block> getBlocks() {
+        return blocks;
     }
 
-    public void setSections(List<Section> sections) {
-        this.sections = sections;
+    public void setBlocks(List<Block> blocks) {
+        this.blocks = blocks;
     }
 
     public List<Route> getRoutes() {
