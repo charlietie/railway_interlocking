@@ -5,18 +5,23 @@ import java.util.List;
  * Created by tommy on 2016/2/15.
  */
 public class Route {
+    public static final Route dao = new Route();
+
     String id;
     String source;
     String dest;
     List<Signal> signals = new ArrayList<>();
     String path;
     String conflicts;
+    int direction;//0->DOWN   1->UP
 
-    public Route(String id,String source,String dest,String path){
+
+    public Route(String id,String source,String dest,String path,int direction){
         this.id = id;
         this.source = source;
         this.dest = dest;
         this.path = path;
+        this.direction = direction;
     }
 
 //    public List<Section> getSection(String source,String dest){
@@ -80,6 +85,35 @@ public class Route {
 
 
 //        System.out.println(this.source+" "+this.dest+" "+points+" "+signals+" "+paths+" "+conflicts);
+    }
+
+    public Route() {
+
+    }
+
+    /**
+    * get route by its id
+    *
+    * */
+    public Route getById(List<Route> routes,String id){
+        Route r = null;
+        for (int i = 0; i < routes.size(); i++) {
+            Route route = routes.get(i);
+            if (route.getId().equals(id)){
+                r=route;
+                break;
+            }
+        }
+        return r;
+    }
+
+
+    public int getDirection() {
+        return direction;
+    }
+
+    public void setDirection(int direction) {
+        this.direction = direction;
     }
 
     public String getId() {

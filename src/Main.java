@@ -4,18 +4,18 @@
 public class Main {
     public static void main(String[] args){
         Railway railway = new Railway();
+        String source = "s1";
+        String dest = "s7";
+        railway.testRun(source,dest);
+
+/*
         while (true){
-
-            railway.run();
-
             try {
                 Thread.sleep(10000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-
-
-        }
+        }*/
     }
 }
 
