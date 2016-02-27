@@ -25,7 +25,6 @@ public class Railway {
 
         for (int i = 0; i < this.routes.size(); i++) {
             Route route = Route.dao.getById(this.routes, this.routes.get(i).getId());
-//            System.out.println("Now route is " + route.getId() + " and direction is " + route.getDirection());
             if (route.getDirection() == 1) {//signal direction=0->down  1->up
                 this.upRoutes.add(route);
             } else {
@@ -35,27 +34,13 @@ public class Railway {
 
         for (int i = 0; i < this.signals.size(); i++) {
             Signal signal = Signal.dao.getByName(this.signals, this.signals.get(i).getName());
-            System.out.println("Now signal is " + signal.getName() + " and direction is " + signal.getDirection());
             if (signal.getDirection() == 1) {//signal direction=0->down  1->up
                 this.upSignals.add(signal);
             } else {
                 this.downSignals.add(signal);
             }
         }
-        System.out.println(this.upSignals.size() + " " + this.downSignals.size());
 
-       /* for (int i = 0; i < signals.size(); i++) {
-            Signal s = signals.get(i);
-            String flag = s.getPosition() == 0 ? "STOP" : "GO";
-            String direction = s.getDirection() == 0 ? "DOWN" : "UP";
-//            System.out.println("Signal: "+s.getName()+"("+direction+") controls block: "+s.getBlockName()+" current flag: "+flag);
-        }
-
-        for (int i = 0; i < this.blocks.size(); i++) {
-            Block b = this.blocks.get(i);
-            String type = b.getType() == 0 ? "track" : "point";
-//            System.out.println("Block: "+b.getName()+" is a "+type+ " and position is "+b.getPosition());
-        }*/
     }
 
     public void run() {
@@ -100,7 +85,37 @@ public class Railway {
         int level = 0;
 //        chooseRoute(source, dest, source, possible, results, result, level);
         System.out.println("-----------------------------------");
-        generateRoutes(source, dest, source, possible, results, result, level);
+//        generateRoutes(source, dest, source, possible, results, result, level);
+        visitList(source,dest,source,source);
+        for (int i = 0; i < this.possibles.size(); i++) {
+            System.out.println(this.possibles.get(i));
+        }
+    }
+
+    public String visitList(String source, String dest, String current, String result){
+        Signal signal = Signal.dao.getByName(this.signals,current);//get current signal
+        System.out.println(" " + signal.getName()+" "+signal.getNeighs().size());
+
+        for (int i = 0; i < signal.getNextArray().length; i++) {
+            System.out.println("Into the loop in loop");
+            String[] s = signal.getNextArray();
+            String next = s[i];
+            if (next.equals("")) {
+                this.possibles.add(result);
+                System.out.println("Before replace:"+result);
+                result = result.replaceAll(";"+signal.getName(),"");
+                System.out.println("After replace:"+result);
+                break;
+            } else {
+                System.out.println("rs = " + result);
+                result += ";" + next;
+                System.out.println("rs = " + result);
+                result = visitList(source,dest,next,result);
+
+            }
+        }
+
+        return result;
     }
 
     public void generateRoutes(String source, String dest, String current, List<Route> possible, List<String> results, String result, int level) {
@@ -123,17 +138,16 @@ public class Railway {
             this.signals.get(i).setNextArray(ss);
         }
 
-        System.out.println("Start num" + this.upSignals.size() + " " + this.downSignals.size());
+        System.out.println("Start num up:" + this.upSignals.size() + " down:" + this.downSignals.size());
         int num = 1;//number of possibility
         for (int i = 0; i < this.upSignals.size(); i++) {
             Signal signal = this.upSignals.get(i);
-            System.out.println(this.signals.get(i).getName() + ":");
+            System.out.println(signal.getName() + " has " + signal.getNextArray().length + " next signals ");
             for (int j = 0; j < signal.getNextArray().length; j++) {
                 String[] s = signal.getNextArray();
                 System.out.println(s[j]);
             }
             num *= signal.getNextArray().length;
-            System.out.println(signal.getName() + " has " + signal.getNextArray().length + " next signals ");
 
             System.out.println("\n");
         }
@@ -143,12 +157,12 @@ public class Railway {
 
 //        System.out.println("Do something to get the routes");
 
-        Map<String,Object> map = new HashMap<>();
-        map.put("source",source);
-        map.put("dest",dest);
-        map.put("name",source);
-        map.put("rs",source);
-        map.put("restart","0");//0->dont restart   1->restart
+        Map<String, Object> map = new HashMap<>();
+        map.put("source", source);
+        map.put("dest", dest);
+        map.put("name", source);
+        map.put("rs", source);
+        map.put("restart", "0");//0->dont restart   1->restart
         loopArray(map);
         if (level == 0) {
             for (int i = 0; i < num; i++) {
@@ -157,40 +171,40 @@ public class Railway {
         }
     }
 
-    public Map<String,Object> loopArray(Map<String,Object> map){
+    public Map<String, Object> loopArray(Map<String, Object> map) {
         System.out.println("Loop---------------------");
-        System.out.println("Choose which route to run from :" + map.get("source") + " to :" +  map.get("dest") + " and now is at :" +  map.get("name"));
+        System.out.println("Choose which route to run from :" + map.get("source") + " to :" + map.get("dest") + " and now is at :" + map.get("name"));
         Signal signal = Signal.dao.getByName(this.signals, map.get("name").toString());
-        String source =  map.get("source").toString();
-        String dest =  map.get("dest").toString();
-        String rs =  map.get("rs").toString();
+        String source = map.get("source").toString();
+        String dest = map.get("dest").toString();
+        String rs = map.get("rs").toString();
         for (int i = 0; i < signal.getNextArray().length; i++) {
             System.out.println("Into the loop in loop");
             String[] s = signal.getNextArray();
             String next = s[i];
-            if (next.equals("")){
+            if (next.equals("")) {
                 this.possibles.add(rs);
-                map.put("restart","1");
+                map.put("restart", "1");
                 break;
-            }else {
-                System.out.println("rs = " +rs);
-                map.put("restart","0");
+            } else {
+                System.out.println("rs = " + rs);
+                map.put("restart", "0");
                 rs += ";" + next;
-                System.out.println("rs = " +rs);
-                map.put("name",next);
-                map.put("rs",rs);
-                System.out.println("1map = " +map);
+                System.out.println("rs = " + rs);
+                map.put("name", next);
+                map.put("rs", rs);
+                System.out.println("1map = " + map);
                 map = loopArray(map);
-                System.out.println("2map = " +map);
+                System.out.println("2map = " + map);
 
             }
         }
-        if (map.get("restart").toString().equals("1")){
-            map.put("rs",source);
+        if (map.get("restart").toString().equals("1")) {
+            map.put("rs", source);
         }
         System.out.println(rs);
         System.out.println("Loop end++++++++++++++++++++++");
-        System.out.println("3map = " +map);
+        System.out.println("3map = " + map);
         return map;
     }
 

@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -11,17 +12,39 @@ public class Signal {
     int direction;// 0 -> DOWN    1 -> UP
     int position=0;//0 -> stop    1 -> go
     String blockName;//control which block to access
+
     String next;//next signals   s2;s4;s6
+    String previous;//previous signals  s1;s2
+
     String[] nextArray;
+    List<String> neighs = new ArrayList<>();
+    List<String> visited = new ArrayList<>();
 
     public Signal() {
     }
 
-    public Signal(String name, int direction, String blockName,String next) {
+    public Signal(String name, int direction, String blockName,String previous,String next) {
         this.name = name;
         this.direction = direction;
         this.blockName = blockName;
         this.next = next;
+        this.previous = previous;
+
+        String s = this.getNext();
+        String[] ss;
+        if (s.contains(";")) {// more than one signal
+            ss = s.split(";");
+        } else if (!s.equals("")) {// one signal
+            ss = new String[1];
+            ss[0] = s;
+        } else {//no signal
+            ss = new String[1];
+            ss[0] = "";
+        }
+        for (int i = 0; i < ss.length; i++) {
+            this.neighs.add(ss[i]);
+        }
+
     }
 
     /**
@@ -40,7 +63,29 @@ public class Signal {
         return s;
     }
 
+    public String getPrevious() {
+        return previous;
+    }
 
+    public void setPrevious(String previous) {
+        this.previous = previous;
+    }
+
+    public List<String> getNeighs() {
+        return neighs;
+    }
+
+    public void setNeighs(List<String> neighs) {
+        this.neighs = neighs;
+    }
+
+    public List<String> getVisited() {
+        return visited;
+    }
+
+    public void setVisited(List<String> visited) {
+        this.visited = visited;
+    }
 
     public int getPosition() {
         return position;
