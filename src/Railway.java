@@ -1,3 +1,4 @@
+
 import java.util.*;
 
 /**
@@ -11,10 +12,7 @@ public class Railway {
     List<Route> routes;
     List<Route> upRoutes = new ArrayList<>();
     List<Route> downRoutes = new ArrayList<>();
-    List<Route> runnings = new ArrayList<>();//current running routes
-    List<Route> waitings = new ArrayList<>();//current waiting routes
-
-    List<String> possibles = new ArrayList<>();
+    List<Journey> journeys = new ArrayList<>();
 
     public Railway() {
 
@@ -25,7 +23,6 @@ public class Railway {
 
         for (int i = 0; i < this.routes.size(); i++) {
             Route route = Route.dao.getById(this.routes, this.routes.get(i).getId());
-//            System.out.println("Now route is " + route.getId() + " and direction is " + route.getDirection());
             if (route.getDirection() == 1) {//signal direction=0->down  1->up
                 this.upRoutes.add(route);
             } else {
@@ -35,348 +32,256 @@ public class Railway {
 
         for (int i = 0; i < this.signals.size(); i++) {
             Signal signal = Signal.dao.getByName(this.signals, this.signals.get(i).getName());
-            System.out.println("Now signal is " + signal.getName() + " and direction is " + signal.getDirection());
             if (signal.getDirection() == 1) {//signal direction=0->down  1->up
                 this.upSignals.add(signal);
             } else {
                 this.downSignals.add(signal);
             }
         }
-        System.out.println(this.upSignals.size() + " " + this.downSignals.size());
 
-       /* for (int i = 0; i < signals.size(); i++) {
-            Signal s = signals.get(i);
-            String flag = s.getPosition() == 0 ? "STOP" : "GO";
-            String direction = s.getDirection() == 0 ? "DOWN" : "UP";
-//            System.out.println("Signal: "+s.getName()+"("+direction+") controls block: "+s.getBlockName()+" current flag: "+flag);
-        }
-
-        for (int i = 0; i < this.blocks.size(); i++) {
-            Block b = this.blocks.get(i);
-            String type = b.getType() == 0 ? "track" : "point";
-//            System.out.println("Block: "+b.getName()+" is a "+type+ " and position is "+b.getPosition());
-        }*/
     }
 
-    public void run() {
-        System.out.println("#################################");
-        if (this.runnings.size() == 0) {
-            System.out.println("There is no route running in the railway!");
-        } else {
-            for (int i = 0; i < this.runnings.size(); i++) {
-                Route route = runnings.get(i);
-                System.out.println("Route " + route.getId() + " from " + route.getSource() + " to " + route.getDest() + " is running");
-            }
+    public void addJourney(String journeyId, String source, String dest, String passby) {
+//        System.out.println("#####################  Adding journeys begins! ####################");
+        Journey journey = new Journey(journeyId, source, dest);
+        String[] passbys = passby.split(";");
+        for (int i = 1; i < passbys.length; i++) {
+//            System.out.println("Source:" + passbys[i - 1] + "  dest:" + passbys[i]);
+
+            Route route = Route.dao.getBySourceAndDest(this.routes, passbys[i - 1], passbys[i]);
+            journey.getRoutes().add(route);
         }
 
-        //add a random route into the railway
-        Random random = new Random();
-        int ran = random.nextInt(this.routes.size());
-        Route added = this.routes.get(ran);
-        this.waitings.add(added);
+        String routeId = journey.getRoutes().get(0).getId();//get the first route id
+        journey.setCurrentRoute(routeId);//set the current route id
+        Route route = Route.dao.getById(this.routes, routeId);//get the route by its id
+        Signal signal = Signal.dao.getByName(this.signals, route.getSource());//get the signal by route source
+        journey.setCurrentBlock(signal.getCurrentBlock());//set the journey current block by signal's current
+//        System.out.println("Journey current route is " + journey.getCurrentRoute() + " and block is " + journey.getCurrentBlock());
 
-        //calculate which routes could be added into the railway
-        calculate();
-
-        System.out.println("Now there are " + this.runnings.size() + " running");
-        System.out.println("#################################\n");
+        this.journeys.add(journey);
+//        System.out.println("#####################  Adding journeys ends! ####################\n");
     }
 
-    public void testRun(String source, String dest) {
-
-
-        List<Route> possible = new ArrayList<>();
-        List<String> results = new ArrayList<>();
-        String result = source;
-//        results.add(source);//add the source signal as the first one
-        Signal signal = Signal.dao.getByName(this.signals, source);
-        boolean isLoop = false;
-        if (signal.getDirection() == 0) {
-            possible.addAll(downRoutes);
-        } else {
-            possible.addAll(upRoutes);
-        }
-//        System.out.println("Init possible are "+possible.size());
-        int level = 0;
-//        chooseRoute(source, dest, source, possible, results, result, level);
-        System.out.println("-----------------------------------");
-        generateRoutes(source, dest, source, possible, results, result, level);
-    }
-
-    public void generateRoutes(String source, String dest, String current, List<Route> possible, List<String> results, String result, int level) {
-        for (int i = 0; i < this.signals.size(); i++) {
-            Signal signal = this.signals.get(i);
-            String s = signal.getNext();
-            String[] ss;
-            if (s.contains(";")) {// more than one signal
-                ss = s.split(";");
-            } else if (!s.equals("")) {// one signal
-                ss = new String[1];
-                ss[0] = s;
-            } else {//no signal
-                ss = new String[1];
-                ss[0] = "";
-            }
-//            for (int j  = 0; j < ss.length; j++) {
-//                System.out.println(ss[j]);
-//            }
-            this.signals.get(i).setNextArray(ss);
-        }
-
-        System.out.println("Start num" + this.upSignals.size() + " " + this.downSignals.size());
-        int num = 1;//number of possibility
-        for (int i = 0; i < this.upSignals.size(); i++) {
-            Signal signal = this.upSignals.get(i);
-            System.out.println(this.signals.get(i).getName() + ":");
-            for (int j = 0; j < signal.getNextArray().length; j++) {
-                String[] s = signal.getNextArray();
-                System.out.println(s[j]);
-            }
-            num *= signal.getNextArray().length;
-            System.out.println(signal.getName() + " has " + signal.getNextArray().length + " next signals ");
-
-            System.out.println("\n");
-        }
-        System.out.println("num is " + num);
-
-        List<Route> routeList = possible;
-
-//        System.out.println("Do something to get the routes");
-
-        Map<String,Object> map = new HashMap<>();
-        map.put("source",source);
-        map.put("dest",dest);
-        map.put("name",source);
-        map.put("rs",source);
-        map.put("restart","0");//0->dont restart   1->restart
-        loopArray(map);
-        if (level == 0) {
-            for (int i = 0; i < num; i++) {
-                System.out.println(possibles.get(i));
-            }
-        }
-    }
-
-    public Map<String,Object> loopArray(Map<String,Object> map){
-        System.out.println("Loop---------------------");
-        System.out.println("Choose which route to run from :" + map.get("source") + " to :" +  map.get("dest") + " and now is at :" +  map.get("name"));
-        Signal signal = Signal.dao.getByName(this.signals, map.get("name").toString());
-        String source =  map.get("source").toString();
-        String dest =  map.get("dest").toString();
-        String rs =  map.get("rs").toString();
-        for (int i = 0; i < signal.getNextArray().length; i++) {
-            System.out.println("Into the loop in loop");
-            String[] s = signal.getNextArray();
-            String next = s[i];
-            if (next.equals("")){
-                this.possibles.add(rs);
-                map.put("restart","1");
-                break;
-            }else {
-                System.out.println("rs = " +rs);
-                map.put("restart","0");
-                rs += ";" + next;
-                System.out.println("rs = " +rs);
-                map.put("name",next);
-                map.put("rs",rs);
-                System.out.println("1map = " +map);
-                map = loopArray(map);
-                System.out.println("2map = " +map);
-
-            }
-        }
-        if (map.get("restart").toString().equals("1")){
-            map.put("rs",source);
-        }
-        System.out.println(rs);
-        System.out.println("Loop end++++++++++++++++++++++");
-        System.out.println("3map = " +map);
-        return map;
-    }
-
-    /**
-     * possible : all routes that in the same direction at this time
-     * results : fixed lines which could be used to make a journey
-     * result : one line which contains all signals like  s1,s6,s7
-     */
-    public String chooseRoute(String source, String dest, String current, List<Route> possible, List<String> results, String result, int level) {
-        System.out.println("#####################################################################");
-        System.out.println("Choose which route to run from :" + source + " to :" + dest + " and now is at :" + current);
-        //if current is not the dest
-//        if (!dest.equals(current)) {
-//        if (possible.size()!=0){
-        List<Route> routeList = possible;
-
-//        System.out.println("Do something to get the routes");
-
-        for (int i = 0; i < routeList.size(); i++) {
-            Route route = routeList.get(i);
-
-            String next = route.getDest();//get the dest of this route
-            //add one signal to the journey line
-            result += ";" + next;//add this route dest to the tail like   s1;s6
-            System.out.println("Results add one signal : " + next);
-            possible.remove(i);
-            System.out.println("Start chooseRoute again!");
-            level++;
-            System.out.println("Level is " + level + "  " + result);
-            result = chooseRoute(source, dest, next, possible, results, result, level);
-
-            if (result.contains(dest)) {
-                this.possibles.add(result);
-                System.out.println("Find all the signals and add it to the results list " + results.size() + " and break ");
-                level--;
-                System.out.println("Level is " + level);
-                break;
-            }
-        }
-//        }else {
-
-//            System.out.println("!!!!!This journey has get all answer!!! Signals are:"+result);
-
-//        }
-        System.out.println("#####################################################################\n\r");
-        if (level == 0) {
-            for (int i = 0; i < possibles.size(); i++) {
-                System.out.println(possibles.get(i));
-            }
-        }
-        return result;
-    }
-
-
-    /**
-     * get the next route
-     */
-    public void getNextRoute() {
-        System.out.println("Get the next route ");
-    }
-
-    /**
-     * compare the runnings and the waitings
-     * to see if the waitings could be add into the railway
-     */
-    public void calculate() {
-        if (this.runnings.size() == 0) {
-            Route route = this.waitings.get(0);
-            System.out.println("Railway now is empty.First route " + route.getId() + " is added");
-            System.out.println("1 Runnings :" + this.runnings.size() + "      waitings :" + this.waitings.size());
-            String path = route.getPath();
-            String[] paths;
-            if (path.contains(";")) {
-                paths = path.split(";");
-            } else {
-                paths = new String[1];
-                paths[0] = path;
-            }
-            System.out.println("paths are");
-            for (int i = 0; i < paths.length; i++) {
-                System.out.println(paths[i]);
-            }
-            List<Signal> signals = route.getSignals();
-
-            System.out.println("signals are");
-            for (int i = 0; i < signals.size(); i++) {
-                System.out.println(signals.get(i).getName());
-            }
-
-            for (int i = 0; i < this.signals.size(); i++) {
-                Signal s = this.signals.get(i);//
-                for (int j = 0; j < signals.size(); j++) {
-                    if (s.getName().equals(signals.get(j).getName())) {
-                        this.signals.get(i).setPosition(1);//set to stop
-                        System.out.println("Signal " + this.getSignals().get(i).getName() + " is changed to stop by " + route.getId());
-                    }
+    public void checkWaitingList() {
+        System.out.println("#####################  Checking waiting journeys begins! ####################");
+        for (int i = 0; i < this.journeys.size(); i++) {
+            Journey waiting = this.journeys.get(i);
+            if (waiting.getState() == 0) {//if this journey is waiting
+                boolean flag = lock(waiting, waiting.getCurrentRoute());
+                for (int j = 0; j < this.signals.size(); j++) {
+                    System.out.println("Signal " + this.signals.get(j).getName() + "  :  " + this.signals.get(j).getPosition());
                 }
-            }
-
-
-            for (int i = 0; i < paths.length; i++) {
                 for (int j = 0; j < this.blocks.size(); j++) {
-                    Block section = this.blocks.get(j);
-                    if (section.getName().equals(paths[i])) {
-                        this.blocks.get(j).setOccupy(route.getId());//set occupy to this section
-                        System.out.println("Block " + this.getBlocks().get(j).getName() + " is occupied by " + route.getId());
+                    if (this.blocks.get(j).getType() == 1) {//point
+                        System.out.println("Point " + this.blocks.get(j).getName() + "  :  " + this.blocks.get(j).getOccupy() + "  position: " + (this.blocks.get(j).getPosition() == 0 ? "PLUS" : "MINUS"));
+                    } else {
+                        System.out.println("Block " + this.blocks.get(j).getName() + "  :  " + this.blocks.get(j).getOccupy());
+                    }
+                }
+                if (flag) {
+                    this.journeys.get(i).setState(1);
+
+                    Route route = Route.dao.getById(this.routes,waiting.getCurrentRoute());
+
+                    System.out.println("Journey " + this.journeys.get(i).getId() + " satisfies all conditions and set to " + this.journeys.get(i).getState() + " and lock all signals in this route");
+
+                    String currentRoute = waiting.getCurrentRoute();
+
+
+                }
+            }
+        }
+
+        System.out.println("#####################  Checking waiting journeys ends! ####################\n");
+    }
+
+    public void runFreely() {
+        System.out.println("#####################  Checking running journeys begins! ####################");
+        List<Journey> journeys = this.journeys;
+
+
+        for (int i = 0; i < journeys.size(); i++) {
+            Journey j = journeys.get(i);
+
+            String id = j.getId();
+            String currentRoute = j.getCurrentRoute();//the route which the train is on
+            String currentBlock = j.getCurrentBlock();//the block which the train is on
+            int state = j.getState();//current state of the journey
+
+            if (state == 1) {//only the state is running could run
+                System.out.println("Journey " + id + " starts running!");
+                boolean addRouteFlag = false;
+                List<Route> routes = new ArrayList<>();// the rest routes to run for this journey
+                for (int k = 0; k < j.getRoutes().size(); k++) {
+                    if (j.getRoutes().get(k).getId().equals(currentRoute)) {
+                        addRouteFlag = true;
+                    }
+
+                    if (addRouteFlag) {
+                        routes.add(j.getRoutes().get(k));
+                    }
+                }
+
+                Route route = routes.get(0);
+                String paths = route.getPath();
+                String[] path = paths.split(";");
+
+                boolean isInArray = false;
+                for (int k = 0; k < path.length; k++) {
+//                    System.out.println("k[" + k + "]=" + path[k] + " and current block is " + currentBlock);
+                    if (path[k].equals(currentBlock)){
+                        isInArray = true;
+                    }
+                    if (k==path.length-1 && !isInArray){
+                        this.journeys.get(i).setCurrentBlock(path[0]);//set the current block of this journey
+                        System.out.println("Journey " + this.journeys.get(i).getId() + " moves from block " + currentBlock + " to " + this.journeys.get(i).getCurrentBlock() + " and release the block " + currentBlock);
+                        releaseBlock(currentBlock);//release the passed block
+                        break;
+                    }else {
+                        if (path[k].equals(currentBlock)) {// if the train is on this block
+                            if (k < path.length - 1) {//there are more than one block to go in this route
+                                this.journeys.get(i).setCurrentBlock(path[k+1]);//set the current block of this journey
+                                System.out.println("Journey " + this.journeys.get(i).getId() + " moves from block " + currentBlock + " to " + this.journeys.get(i).getCurrentBlock() + " and release the block " + currentBlock);
+                                releaseBlock(currentBlock);//release the passed block
+                            } else {
+                                this.journeys.get(i).setCurrentBlock(path[k]);//set the current block of this journey
+                                if (routes.size() > 1) {//there are more than one route left to run in this journey
+                                    this.journeys.get(i).setCurrentRoute(routes.get(1).getId());//set the current route id by the next route of the route list
+                                    this.journeys.get(i).setState(0);//set the state waiting
+                                    System.out.println("Journey " + this.journeys.get(i).getId() + " has " + routes.size() + " routes and moves from route " + currentRoute + " to " + this.journeys.get(i).getCurrentRoute() + " and change state from " + state + " to " + this.journeys.get(i).getState());
+                                } else {
+                                    this.journeys.get(i).setState(2);//set this journey end
+                                    System.out.println("Journey " + this.journeys.get(i).getId() + " has no routes to run and change state from " + state + " to " + this.journeys.get(i).getState() + " and release all signals in this route");
+                                    releaseBlock(currentBlock);//release the passed block
+                                }
+                                releaseSignal(route);
+                            }
+                            break;
+                        }
                     }
                 }
             }
+        }
 
-            this.runnings.add(route);//add the route to the running routes
-            this.waitings.clear();//clear the waiting routes
+        System.out.println("#####################  Checking running journeys ends! ####################\n");
+    }
 
-        } else {
-            Iterator<Route> waiting = this.waitings.iterator();
-            while (waiting.hasNext()) {
-                Route route = waiting.next();
-                System.out.println("Route " + route.getId() + " in the waitings is added");
-                boolean flag = true;//true -> not occupied    false -> occupied
-                for (int i = 0; i < this.blocks.size(); i++) {
-                    String currentSecction = this.blocks.get(i).getName();
-                    String path = route.getPath();
-                    String[] paths;
-                    if (path.contains(";")) {
-                        paths = path.split(";");
-                    } else {
-                        paths = new String[1];
-                        paths[0] = path;
-                    }
+    /**
+     * Lock a list of blocks and change signal by a journey and the current route
+     * route : a route belongs to a journey
+     * name : the current block it is on
+     */
+    public boolean lock(Journey journey, String routeId) {
+        System.out.println("-------------------------lock  checking------------------------------");
+        System.out.println("Journey id :" + journey.getId() + " and current route is :" + routeId + " and block is :"+journey.getCurrentBlock());
 
+        boolean flag = true;
+        List<Block> blocks = this.blocks;
+        List<Signal> signals = this.signals;
 
-                    for (int j = 0; j < paths.length; j++) {
-                        System.out.println("current section name is " + currentSecction + " and this path name is " + paths[j]);
-                        if (currentSecction != null && currentSecction.equals(paths[j])) {
-                            System.out.println("Block " + paths[j] + " is occupied by " + this.blocks.get(i).getOccupy());
+        Route route = Route.dao.getById(this.routes, routeId);//get the current route
+        String path = route.getPath();//get the passing path of the route
+        String[] paths = path.split(";");
+
+        for (int i = 0; i < blocks.size(); i++) {
+            for (int j = 0; j < paths.length; j++) {
+                if (blocks.get(i).getName().equals(paths[j])) {
+                    System.out.println(blocks.get(i).getName() + " is occupied by journey < " + blocks.get(i).getOccupy() + " > and now journey is " + journey.getId());
+                    if (!blocks.get(i).getOccupy().equals("")) {//some on occupy
+                        if (!blocks.get(i).getOccupy().equals(journey.getId())) {//the one who wants to occupy is not the one who has occupied
+//                            System.out.println("Block " + blocks.get(i).getName() + " is occupied by " + blocks.get(i).getOccupy() + "!!! Set flag to false!");
                             flag = false;
                             break;
                         }
                     }
+                }
+            }
+            if (!flag) {
+                break;
+            }
+        }
 
-                    if (!flag) {
-                        break;
-                    } else {
-                        System.out.println("This route " + route.getId() + " path " + route.getPath() + " is clear and could go now!");
+        for (int i = 0; i < blocks.size(); i++) {
+            for (int j = 0; j < paths.length; j++) {
+                if (blocks.get(i).getName().equals(paths[j])) {
+                    if (flag) {// no journey occupy
+                        blocks.get(i).setOccupy(journey.getId());
+
+                        if (blocks.get(i).getType() == 1) {// this is a point
+                            String[] point;
+                            if (route.getPoints().contains(";")) {
+                                point = route.getPoints().split(";");
+                            } else {
+                                point = new String[1];
+                                point[0] = route.getPoints();
+                            }
+
+                            int position = 0;
+                            for (int k = 0; k < point.length; k++) {
+                                String[] p = point[k].split(":");
+                                if (blocks.get(i).getName().equals(p[0])) {
+                                    position = p[1].equals("p") ? 0 : 1;
+                                }
+                            }
+
+                            blocks.get(i).setPosition(position);
+                        }
                     }
                 }
+            }
+        }
 
-                if (flag) {
-                    System.out.println("Add this route into runnings");
-                    this.runnings.add(route);//add the route to the running routes
-                    waiting.remove();
-                } else {
-                    System.out.println("Add this route into waitings");
+        if (flag) {
+            this.blocks = blocks;
+            System.out.println(journey.getId() + " satisfies every condition! Lock now and set the signals stop!");
+        }
+
+        String[] signal = route.getSignals().split(";");
+        for (int i = 0; i < signals.size(); i++) {
+            for (int j = 0; j < signal.length; j++) {
+                if (flag && signals.get(i).getName().equals(signal[j])) {//signal name is the same and set to stop
+                    this.signals.get(i).setPosition(0);//set to stop
                 }
             }
         }
-        System.out.println("2 Runnings :" + this.runnings.size() + "      waitings :" + this.waitings.size());
 
-        for (int i = 0; i < this.runnings.size(); i++) {
-            Route route = this.runnings.get(i);
-            String path = route.getPath();
-            String[] paths;
-            if (path.contains(";")) {
-                paths = path.split(";");
-            } else {
-                paths = new String[1];
-                paths[0] = path;
+
+        System.out.println("-------------------------lock  end------------------------------");
+        return flag;
+    }
+
+    public void releaseBlock(String name) {
+        for (int i = 0; i < this.blocks.size(); i++) {
+            if (this.blocks.get(i).getName().equals(name)) {
+                this.blocks.get(i).setOccupy("");
+                System.out.println("Release block " + name + " and now it is occupied by " + this.blocks.get(i).getOccupy());
             }
+        }
+    }
 
+    public void releaseSignal(Route route) {
+        String signals = route.getSignals();
+        String[] signal = signals.split(";");
 
+        for (int i = 0; i < this.signals.size(); i++) {
+            for (int j = 0; j < signal.length; j++) {
+                if (this.signals.get(i).getName().equals(signal[j])) {
+                    this.signals.get(i).setPosition(1);//set the signal to go
+//                    System.out.println("Set " + this.signals.get(i).getName() + " to go");
+                }
+            }
         }
 
     }
 
-    /**
-     * update the railway's
-     * signals
-     * blocks
-     * runnings
-     * waitings
-     */
-    public void update(Route route) {
-
-        System.out.println("Railway now is updating by route " + route.getId());
+    public List<Journey> getJourneys() {
+        return journeys;
     }
 
+    public void setJourneys(List<Journey> journeys) {
+        this.journeys = journeys;
+    }
 
     public List<Signal> getUpSignals() {
         return upSignals;
@@ -410,29 +315,6 @@ public class Railway {
         this.downRoutes = downRoutes;
     }
 
-    public List<Route> getWaitings() {
-        return waitings;
-    }
-
-    public void setWaitings(List<Route> waitings) {
-        this.waitings = waitings;
-    }
-
-    public List<Route> getRunnings() {
-        return runnings;
-    }
-
-    public void setRunnings(List<Route> runnings) {
-        this.runnings = runnings;
-    }
-
-    public List<String> getPossibles() {
-        return possibles;
-    }
-
-    public void setPossibles(List<String> possibles) {
-        this.possibles = possibles;
-    }
 
     public List<Signal> getSignals() {
         return signals;

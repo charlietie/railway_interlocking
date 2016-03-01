@@ -1,3 +1,4 @@
+
 /**
  * Created by tommy on 2016/2/15.
  */
@@ -7,15 +8,14 @@ public class Block{
     int position;// 0 -> PLUS    1 -> MINUS   3 -> npt point
     String previous;// previous section
     String next;// next section
-    String occupy;//occupy by which route   r1,b2
-//    List<Section> neighs = new ArrayList<>();// 2 neighs for track and 3 neighs for point
+    String occupy;//occupy by which journeyId   j1,j2
 
     public Block(String name, int type, String previous, String next) {
         this.name = name;
         this.type = type;
         this.previous = previous;
         this.next = next;
-//        this.position = position;
+        this.occupy="";
     }
 
     public String getOccupy() {
